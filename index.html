@@ -1,0 +1,42 @@
+<HTML>
+<head>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            var v = document.getElementById("myvideo");
+            var c = document.getElementById("mycanvas");
+            var context = c.getContext("2d");
+            var back = document.createElement('canvas');
+            var backContext = back.getContext('2d');
+            var cH,cW;
+            v.addEventListener('play',()=>{
+                cH = v.clientHeight;
+                cW = v.clientWidth;
+                c.height = cH;
+                c.width = cW;
+                back.height = cH;
+                back.width = cW;
+                draw(v, context, backContext, cW, cH)
+            }, false)
+        }, false);
+        function draw(v,c,bc,w,h) {
+            if(v.paused || v.ended) return false;
+            bc.drawImage(v, 0, 0, w, h);
+            let idata = bc.getImageData(0, 0, w, h)
+            let data = idata.data;
+            for (let i = 0; i< data.length; i++) {
+                if (i%4 == 3) continue; 
+                data[i]=127 + 2*data[i] - data[i+4] - data[i + idata.width*4]
+            }
+            c.putImageData(idata, 0, 0)
+            console.log('drawn')
+            setTimeout(draw, 20, v, c, bc, w, h);
+        }
+    </script>
+</head>
+<body>
+    <video id="myvideo" controls loop>
+        <source src="never.mp4" type="video/mp4">
+    </video>
+    <canvas id="mycanvas"></canvas>
+</body>
+</HTML>
